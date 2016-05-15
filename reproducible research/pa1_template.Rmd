@@ -1,0 +1,84 @@
+
+---
+title: "Peer assessment 1"
+author: "Gil TOSSOU"
+date: "May 15, 2016"
+output: 
+  html_document
+---
+# Reproducible Research: Peer Assessment 1
+
+## Load the data from working directory into data frame
+```{r}
+activity<-read.csv(file = "activity.csv",header = TRUE)
+```
+### Quick look to data (first 7 rows) and dimensionof the data
+```{r}
+dim(activity)
+head(activity,6)
+```
+###check data types
+```{r}
+str(activity)
+```
+We notice that the *date* variable is a *factor* variable. 
+
+### Let's convert it into *date* object
+```{r}
+activity$date=as.Date(activity$date)
+```
+## Mean and median number of steps taken each day
+```{r}
+sumStepsDate=tapply(activity$steps,activity$date,sum)
+summary(sumStepsDate)
+```
+
+## Histogram of the total number of steps taken each day
+```{r totalStepsByDay, fig.width=8,fig.height=4,echo=TRUE}
+sumStepsDateNonas<-sumStepsDate
+hist(sumStepsDate)
+```
+## The 5-minute interval that, on average, contains the maximum number of steps
+ ```{r}
+sumStepsDate <- data.frame(template=names(sumStepsDate),mean=sumStepsDate)
+colnames(sumStepsDate)<-c("date","steps")
+row.names(sumStepsDate) <- NULL
+```
+### Get date feature to date type and remove nas
+ ```{r}
+sumStepsDate$date<-as.Date(sumStepsDate$date)
+sumStepsDate<-na.omit(sumStepsDate)
+```
+### Now, the plot
+```{r}
+plot(sumStepsDate$date,sumStepsDate$steps,type="l",col="blue")
+```
+##  The 5-minute interval that, on average, contains the maximum number of steps
+```{r}
+factorActivity<-activity
+factorActivity$interval<-as.factor(factorActivity$interval)
+meanByInterval<-tapply(factorActivity$steps,factorActivity$interval,mean,na.rm=T)
+
+summary(meanByInterval)
+```
+## Code to describe and show a strategy for imputing missing data
+### Missing values by variables
+```{r}
+table(is.na(activity$steps))
+table(is.na(activity$interval))
+table(is.na(activity$date))
+```
+### The nas values are only in the *steps* variable
+
+### Checking for a pattern in the missing values
+```{r}
+table(activity$date,is.na(activity$steps))
+```
+### Let's just remove NAs. To do : use mice or impute() to impute the missing values 
+```{r}
+activity_clean=na.omit(activity)
+```
+## Histogram of the total number of steps taken each day after missing values are imputed
+```{r totalStepsByDayNonas, fig.width=8,fig.height=4,echo=TRUE}
+hist(sumStepsDateNonas)
+```
